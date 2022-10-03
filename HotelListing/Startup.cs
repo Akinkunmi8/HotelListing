@@ -13,6 +13,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.Extensions.Options;
+using HotelListing.Data;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using HotelListing.Configurations;
 
 namespace HotelListing
 {
@@ -28,7 +32,9 @@ namespace HotelListing
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddDbContext<DatabaseContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("SqlConn"))
+            );
             services.AddCors(c => 
             {
                 c.AddPolicy("CorsPolicy", builder =>
@@ -37,13 +43,16 @@ namespace HotelListing
                     .AllowAnyHeader());
             
             });
+
+            services.AddAutoMapper(typeof(MapperInitializer));
             services.AddSwaggerGen(c => 
             {
                 c.SwaggerDoc("v1", new  OpenApiInfo { Title = "HotelListing", Version = "v1", Description = " HotelListing Api Endpint" });
             
             });
-                
-                
+            services.AddControllers();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
