@@ -17,6 +17,8 @@ using HotelListing.Data;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using HotelListing.Configurations;
+using HotelListing.IRepository;
+using HotelListing.Repository;
 
 namespace HotelListing
 {
@@ -45,12 +47,16 @@ namespace HotelListing
             });
 
             services.AddAutoMapper(typeof(MapperInitializer));
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddSwaggerGen(c => 
             {
                 c.SwaggerDoc("v1", new  OpenApiInfo { Title = "HotelListing", Version = "v1", Description = " HotelListing Api Endpint" });
             
             });
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(opt => 
+            
+                opt.SerializerSettings.ReferenceLoopHandling=
+                    Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 
         }
