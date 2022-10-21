@@ -19,6 +19,8 @@ using AutoMapper;
 using HotelListing.Configurations;
 using HotelListing.IRepository;
 using HotelListing.Repository;
+using Microsoft.AspNetCore.Identity;
+using HotelListing.Services;
 
 namespace HotelListing
 {
@@ -37,6 +39,10 @@ namespace HotelListing
             services.AddDbContext<DatabaseContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("SqlConn"))
             );
+            // gor jwt seeting
+            services.AddAuthentication();
+            services.ConfigureIdentity();
+            services.ConfigureJWT(Configuration);
             services.AddCors(c => 
             {
                 c.AddPolicy("CorsPolicy", builder =>
@@ -48,6 +54,7 @@ namespace HotelListing
 
             services.AddAutoMapper(typeof(MapperInitializer));
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IAuthManager, AuthManager>();
             services.AddSwaggerGen(c => 
             {
                 c.SwaggerDoc("v1", new  OpenApiInfo { Title = "HotelListing", Version = "v1", Description = " HotelListing Api Endpint" });
@@ -57,8 +64,7 @@ namespace HotelListing
             
                 opt.SerializerSettings.ReferenceLoopHandling=
                     Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-
-
+            services.AddIdentity<ApiUser, IdentityRole>().AddEntityFrameworkStores<DatabaseContext>().AddDefaultTokenProviders();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +82,7 @@ namespace HotelListing
             app.UseCors("AllowAll");
 
             app.UseRouting();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

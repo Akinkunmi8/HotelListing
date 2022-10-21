@@ -16,6 +16,10 @@ namespace HotelListing.Configurations
             CreateMap<Country, CreateCountryDto>().ReverseMap();
             CreateMap<Hotel, HotelDto>().ReverseMap();
             CreateMap<Hotel, CreateHotelDto>().ReverseMap();
+            CreateMap<Hotel, UpdateHotelDto>().ReverseMap();
+            CreateMap<Country, UpdateCountryDto>().ReverseMap();
+            CreateMap<ApiUser, UserDto>().ReverseMap();
+            CreateMap<ApiUser, LoginDto>().ReverseMap();
         }
     }
 }
