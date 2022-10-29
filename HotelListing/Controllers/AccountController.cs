@@ -30,8 +30,8 @@ namespace HotelListing.Controllers
             UserManager<ApiUser> userManager,
             SignInManager<ApiUser> signInManager,
             IAuthManager authManager)
-            
-            
+
+
         {
             _userManger = userManager;
             _signInManager = signInManager;
@@ -42,7 +42,7 @@ namespace HotelListing.Controllers
         }
 
         [HttpPost]
-        [Route("register")]
+        [Route("register")] 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -53,27 +53,21 @@ namespace HotelListing.Controllers
             {
                 return BadRequest(ModelState);
             }
-            try 
+
+            var user = _mapper.Map<ApiUser>(userDto);
+            user.UserName = userDto.Email;
+            var result = await _userManger.CreateAsync(user, userDto.Password);
+            if (!result.Succeeded)
             {
-                var user = _mapper.Map<ApiUser>(userDto);
-                user.UserName = userDto.Email;
-                var result = await _userManger.CreateAsync(user, userDto.Password);
-                if (!result.Succeeded)
-                { 
-                    foreach(var error in result.Errors)
-                    {
-                        ModelState.AddModelError(error.Code, error.Description);
-                    }
-                    return BadRequest(ModelState);
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.Code, error.Description);
                 }
-                await _userManger.AddToRolesAsync(user, userDto.Roles);
-                return Ok();
+                return BadRequest(ModelState);
             }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, $"Somthing wen wrong in the {nameof(Register)}");
-                return Problem($"Somthing wen wrong in the {nameof(Register)}", statusCode: 500);
-            }
+            await _userManger.AddToRolesAsync(user, userDto.Roles);
+            return Ok(); 
+
         }
 
         [HttpPost]
@@ -84,7 +78,7 @@ namespace HotelListing.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            _logger.LogInformation($"Login Attempt for {loginDto.Email }");
+            _logger.LogInformation($"Login Attempt for {loginDto.Email}");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -95,9 +89,9 @@ namespace HotelListing.Controllers
                 {
                     return Unauthorized();
                 }
-                return Accepted(new {Token = await _authManager.CreateToken()});
+                return Accepted(new { Token = await _authManager.CreateToken() });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, $"Somthing Went Wrong in the{nameof(Login)}");
                 return Problem($"Something went wrong in the {nameof(Login)}", statusCode: 500);
